@@ -1,0 +1,174 @@
+Certainly, I'll explain the code line by line:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+```
+
+These lines include the necessary header files for standard input and output (stdio.h) and dynamic memory allocation (stdlib.h).
+
+```c
+// Structure to represent a member
+struct Member {
+    int memberID;
+    char name[50];
+    struct Member* next;
+};
+```
+
+Here, a structure `Member` is defined to represent a member of the sports center. It contains fields for a member's ID, name, and a pointer to the next member in the linked list.
+
+```c
+// Structure to represent a stack node
+struct StackNode {
+    struct Member* member;
+    struct StackNode* next;
+};
+```
+
+Another structure `StackNode` is defined to represent a node in a stack. It contains a pointer to a member (for undoing purposes) and a pointer to the next node in the stack.
+
+```c
+// Global variables
+struct Member* head = NULL;
+struct StackNode* undoStack = NULL;
+```
+
+Here, global variables `head` and `undoStack` are declared. `head` points to the first member in the linked list of members, and `undoStack` points to the top of the stack used for undoing member additions.
+
+```c
+// Function to display all members
+void displayMembers() {
+    struct Member* current = head;
+
+    if (current == NULL) {
+        printf("No members found.\n");
+        return;
+    }
+
+    printf("Member List:\n");
+    while (current != NULL) {
+        printf("ID: %d, Name: %s\n", current->memberID, current->name);
+        current = current->next;
+    }
+}
+```
+
+This is a function `displayMembers` that displays all the members in the linked list. It iterates through the list and prints each member's ID and name. If there are no members, it prints a message indicating that.
+
+```c
+// Function to search for a member by ID
+struct Member* searchMember(int memberID) {
+    struct Member* current = head;
+
+    while (current != NULL) {
+        if (current->memberID == memberID) {
+            return current;
+        }
+        current = current->next;
+    }
+
+    return NULL;
+}
+```
+
+The `searchMember` function searches for a member with a specified ID. It iterates through the linked list of members and returns a pointer to the member if found, or NULL if not found.
+
+```c
+// Function to insert a new member
+void insertMember(int memberID, char name[]) {
+    struct Member* existingMember = searchMember(memberID);
+
+    if (existingMember != NULL) {
+        printf("Member with ID %d already exists.\n", memberID);
+        return;
+    }
+
+    struct Member* newMember = (struct Member*)malloc(sizeof(struct Member));
+    newMember->memberID = memberID;
+    strcpy(newMember->name, name);
+    newMember->next = head;
+    head = newMember;
+
+    // Push the new member onto the undo stack
+    struct StackNode* stackNode = (struct StackNode*)malloc(sizeof(struct StackNode));
+    stackNode->member = newMember;
+    stackNode->next = undoStack;
+    undoStack = stackNode;
+
+    printf("Member added successfully.\n");
+}
+```
+
+The `insertMember` function inserts a new member into the linked list. It first checks if a member with the same ID already exists. If it does, it prints a message and doesn't add the member. Otherwise, it allocates memory for the new member, sets its ID and name, and adds it to the head of the linked list. Additionally, it pushes the new member onto the undo stack for later undo operations.
+
+```c
+// Function to delete a member by memberID
+void deleteMember(int memberID) {
+    struct Member* current = head;
+    struct Member* prev = NULL;
+
+    while (current != NULL && current->memberID != memberID) {
+        prev = current;
+        current = current->next;
+    }
+
+    if (current == NULL) {
+        printf("Member not found.\n");
+        return;
+    }
+
+    if (prev == NULL) {
+        head = current->next;
+    } else {
+        prev->next = current->next;
+    }
+
+    free(current);
+    printf("Member deleted successfully.\n");
+}
+```
+
+The `deleteMember` function deletes a member by their ID. It iterates through the linked list to find the member, and when found, it removes the member from the list and frees the memory. If the member is not found, it prints a message.
+
+```c
+// Function to undo the last member addition
+void undoAddMember() {
+    if (undoStack == NULL) {
+        printf("No member to undo.\n");
+        return;
+    }
+
+    struct StackNode* stackNode = undoStack;
+    undoStack = undoStack->next;
+
+    // Delete the last added member
+    deleteMember(stackNode->member->memberID);
+    free(stackNode->member);
+    free(stackNode);
+
+    printf("Undo successful.\n");
+}
+```
+
+The `undoAddMember` function allows you to undo the last member addition. It checks if there's a member on the undo stack and, if so, removes it from the stack, deletes it from the member list, and frees the associated memory.
+
+```c
+// Main function
+int main() {
+    int choice;
+    int memberID;
+    char name[50];
+
+    while (1) {
+        // Display menu and read user choice
+        // Perform actions based on the user's choice
+    }
+
+    return 0;
+}
+```
+
+This is the main function where the menu for managing members is displayed, and based on the user's choice, the corresponding functions are called to perform actions like displaying members, inserting a member, deleting a member, searching for a member, undoing the last addition, or exiting the program.
+
+The code is organized into functions, making it modular and easier to understand and maintain. It allows you to perform basic member management operations with undo functionality.
